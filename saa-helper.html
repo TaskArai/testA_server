@@ -6,25 +6,36 @@
     <script>
       document.getElementById('saa-trigger-btn').addEventListener('click', async function() {
         try {
+          // デバッグ1: ボタンクリック前のアクセス権を確認
+          var initialAccess = await document.hasStorageAccess();
+          console.log('ボタンクリック前のアクセス権:', initialAccess);
+
+          // アクセス権をリクエスト
           await document.requestStorageAccess();
+          console.log('requestStorageAccess() を呼び出しました。');
+
+          // デバッグ2: リクエスト後のアクセス権を確認
+          var accessAfterRequest = await document.hasStorageAccess();
+          console.log('リクエスト後のアクセス権:', accessAfterRequest);
+
+          // Cookieの読み取りを試みる
           var cookieName = '_atb_poc_data';
           var atbCookie = document.cookie.match(new RegExp('(^| )' + cookieName + '=([^;]+)')) || [];
           var atbDataString = atbCookie.length > 2 ? decodeURIComponent(atbCookie[2]) : null;
-          
+
           if (atbDataString) {
+            console.log('Cookieの読み取りに成功しました！');
             window.parent.postMessage({
               type: 'atb_data_ready',
               data: JSON.parse(atbDataString)
             }, 'https://taskaraitest.github.io');
             this.innerText = '送信成功!';
-            this.style.background = '#d4edda';
           } else {
-            console.log('Cookieは見つかりましたが、中身が空でした。');
+            console.error('Cookieが読み取れませんでした。現在のCookie文字列:', document.cookie);
             this.innerText = 'データ無';
           }
         } catch (error) { 
-          // ★★★ エラーをコンソールに表示する処理を追加 ★★★
-          console.error('SAAボタンのクリックでエラーが発生しました:', error);
+          console.error('ボタンクリック処理でエラーが発生:', error);
           this.innerText = 'エラー'; 
         }
       });
