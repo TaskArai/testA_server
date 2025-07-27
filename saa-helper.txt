@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head><meta charset="UTF-8"><title>SAA Helper</title></head>
+<body style="margin:0; padding:0;">
+    <button id="saa-trigger-btn" style="width:100%; height:100%; border:1px solid #ccc; background:#f0f0f0; cursor:pointer;">情報を取得</button>
+    <script>
+      document.getElementById('saa-trigger-btn').addEventListener('click', async function() {
+        try {
+          await document.requestStorageAccess();
+          const cookieName = '_atb_poc_data';
+          const atbCookie = document.cookie.match(new RegExp('(^| )' + cookieName + '=([^;]+)')) || [];
+          const atbDataString = atbCookie.length > 2 ? decodeURIComponent(atbCookie[2]) : null;
+          if (atbDataString) {
+            // ↓↓↓ あとでドメインDのオリジンに書き換える ↓↓↓
+            window.parent.postMessage({
+              type: 'atb_data_ready',
+              data: JSON.parse(atbDataString)
+            }, 'https://TaskAraiTest.github.io');
+            this.innerText = '送信成功!';
+            this.style.background = '#d4edda';
+          }
+        } catch (error) { this.innerText = 'エラー'; }
+      });
+    </script>
+</body>
+</html>
