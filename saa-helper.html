@@ -6,19 +6,15 @@
     <script>
       document.getElementById('saa-trigger-btn').addEventListener('click', async function() {
         try {
-          // デバッグ1: ボタンクリック前のアクセス権を確認
           var initialAccess = await document.hasStorageAccess();
           console.log('ボタンクリック前のアクセス権:', initialAccess);
 
-          // アクセス権をリクエスト
           await document.requestStorageAccess();
           console.log('requestStorageAccess() を呼び出しました。');
 
-          // デバッグ2: リクエスト後のアクセス権を確認
           var accessAfterRequest = await document.hasStorageAccess();
           console.log('リクエスト後のアクセス権:', accessAfterRequest);
 
-          // Cookieの読み取りを試みる
           var cookieName = '_atb_poc_data';
           var atbCookie = document.cookie.match(new RegExp('(^| )' + cookieName + '=([^;]+)')) || [];
           var atbDataString = atbCookie.length > 2 ? decodeURIComponent(atbCookie[2]) : null;
