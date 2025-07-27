@@ -7,19 +7,26 @@
       document.getElementById('saa-trigger-btn').addEventListener('click', async function() {
         try {
           await document.requestStorageAccess();
-          const cookieName = '_atb_poc_data';
-          const atbCookie = document.cookie.match(new RegExp('(^| )' + cookieName + '=([^;]+)')) || [];
-          const atbDataString = atbCookie.length > 2 ? decodeURIComponent(atbCookie[2]) : null;
+          var cookieName = '_atb_poc_data';
+          var atbCookie = document.cookie.match(new RegExp('(^| )' + cookieName + '=([^;]+)')) || [];
+          var atbDataString = atbCookie.length > 2 ? decodeURIComponent(atbCookie[2]) : null;
+          
           if (atbDataString) {
-            // ↓↓↓ あとでドメインDのオリジンに書き換える ↓↓↓
             window.parent.postMessage({
               type: 'atb_data_ready',
               data: JSON.parse(atbDataString)
             }, 'https://taskaraitest.github.io');
             this.innerText = '送信成功!';
             this.style.background = '#d4edda';
+          } else {
+            console.log('Cookieは見つかりましたが、中身が空でした。');
+            this.innerText = 'データ無';
           }
-        } catch (error) { this.innerText = 'エラー'; }
+        } catch (error) { 
+          // ★★★ エラーをコンソールに表示する処理を追加 ★★★
+          console.error('SAAボタンのクリックでエラーが発生しました:', error);
+          this.innerText = 'エラー'; 
+        }
       });
     </script>
 </body>
