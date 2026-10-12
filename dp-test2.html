@@ -1,13 +1,82 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<!-- Google Tag Manager -->
-<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MT3FF7H');</script>
-<!-- End Google Tag Manager -->
+<script>
+(function () {
+    "use strict";
+
+    // ================= 設定 =================
+    const COOKIE_NAME = "ga_linker_backup";
+    const TARGET_DOMAIN = "tasuku-arai.but.jp";
+    const TARGET_PATH = "/dp-test2.html";
+    // ========================================
+
+    // Cookieから保存済み_glを取得
+    function getSavedGL() {
+        const cookies = document.cookie.split("; ");
+
+        const target = cookies.find(row =>
+            row.startsWith(COOKIE_NAME + "=")
+        );
+
+        if (!target) {
+            return null;
+        }
+
+        try {
+            return decodeURIComponent(
+                target.substring(COOKIE_NAME.length + 1)
+            );
+        } catch (error) {
+            console.warn("[Linker] Cookieの読取エラー", error);
+            return null;
+        }
+    }
+
+    // リンククリック時に実行
+    document.addEventListener("click", function (event) {
+
+        const link = event.target.closest("a[href]");
+
+        if (!link) return;
+
+        const url = new URL(link.href);
+
+        // ドメインCへのリンクだけ処理
+        if (
+            url.hostname !== TARGET_DOMAIN ||
+            url.pathname !== TARGET_PATH
+        ) {
+            return;
+        }
+
+        // 既に_glが付与されていれば変更しない
+        if (url.searchParams.get("_gl")) {
+            console.log("[Linker] 既存の_glを使用");
+            return;
+        }
+
+        // 独自Cookieを取得
+        const savedGL = getSavedGL();
+
+        if (!savedGL) {
+            console.log("[Linker] 保存された_glがありません");
+            return;
+        }
+
+        // URLに_glを付与
+        url.searchParams.set("_gl", savedGL);
+
+        // リンクの遷移先を更新
+        link.href = url.toString();
+
+        console.log("[Linker] 保存した_glを付与しました");
+        console.log("[Linker] 遷移先:", link.href);
+
+    }, true);
+
+})();
+</script>
   <title>test LP</title>
   <meta charset="UTF-8">
 </head>
@@ -16,8 +85,4 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <a href="https://tasuku-arai.but.jp/dp-test2.html">Thanks page</a>
 
 </body>
-<!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MT3FF7H"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<!-- End Google Tag Manager (noscript) -->
 </html>
